@@ -10,6 +10,21 @@ on:
 
   workflow_dispatch:
 
+env:
+  CC: ccache clang -arch x86_64
+  CXX: ccache clang++ -arch x86_64
+  i386_CC: ccache i686-w64-mingw32-gcc
+  x86_64_CC: ccache x86_64-w64-mingw32-gcc
+  CPATH: /opt/local/include
+  LIBRARY_PATH: /opt/local/lib
+  CFLAGS: -g -O2
+  # gcc14.1 now sets -Werror-incompatible-pointer-types
+  CROSSCFLAGS: -g -O2 -Wno-error=incompatible-pointer-types
+  LDFLAGS: -Wl,-headerpad_max_install_names -Wl,-rpath,@loader_path/../../ -Wl,-rpath,/opt/local/lib -Wl,-rpath,/opt/X11/lib
+  MACOSX_DEPLOYMENT_TARGET: 10.15
+  GSTREAMER_CFLAGS: -I/Library/Frameworks/GStreamer.framework/Headers
+  GSTREAMER_LIBS: -L/Library/Frameworks/GStreamer.framework/Libraries/ -lgstvideo-1.0 -lgstaudio-1.0 -lgstbase-1.0 -lgsttag-1.0 -lgstreamer-1.0 -Wl,-rpath,/Library/Frameworks/GStreamer.framework/Libraries -lgobject-2.0 -lglib-2.0 -lintl
+
 jobs:
   wine-devel:
     runs-on:  macos-latest
@@ -53,20 +68,6 @@ jobs:
         run: git clone --depth=1 https://github.com/wine-mirror/wine.git
 
       - name: Configure wine
-        env:
-          CC: ccache clang -arch x86_64
-          CXX: ccache clang++ -arch x86_64
-          i386_CC: ccache i686-w64-mingw32-gcc
-          x86_64_CC: ccache x86_64-w64-mingw32-gcc
-          CPATH: /opt/local/include
-          LIBRARY_PATH: /opt/local/lib
-          CFLAGS: -g -O2
-          # gcc14.1 now sets -Werror-incompatible-pointer-types
-          CROSSCFLAGS: -g -O2 -Wno-error=incompatible-pointer-types
-          GSTREAMER_CFLAGS: -I/Library/Frameworks/GStreamer.framework/Headers
-          GSTREAMER_LIBS: -L/Library/Frameworks/GStreamer.framework/Libraries/ -lgstvideo-1.0 -lgstaudio-1.0 -lgstbase-1.0 -lgsttag-1.0 -lgstreamer-1.0 -Wl,-rpath,/Library/Frameworks/GStreamer.framework/Libraries -lgobject-2.0 -lglib-2.0 -lintl
-          LDFLAGS: -Wl,-headerpad_max_install_names -Wl,-rpath,/opt/local/lib
-          MACOSX_DEPLOYMENT_TARGET: 10.14
         run: |
           cd $GITHUB_WORKSPACE/wine
           ./configure \
