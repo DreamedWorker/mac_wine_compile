@@ -44,8 +44,8 @@ jobs:
           CXX: "ccache clang++ -arch x86_64"
           i386_CC: "ccache i686-w64-mingw32-gcc"
           x86_64_CC: "ccache x86_64-w64-mingw32-gcc"
-          GSTREAMER_LIBS: "-L/Library/Frameworks/GStreamer.framework/Libraries/ -lgstvideo-1.0 -lgstaudio-1.0 -lgstbase-1.0 -lgsttag-1.0 -lgstreamer-1.0 -Wl,-rpath,/Library/Frameworks/GStreamer.framework/Libraries -lgobject-2.0 -lglib-2.0 -lintl"
           GSTREAMER_CFLAGS: "-I/Library/Frameworks/GStreamer.framework/Headers"
+          GSTREAMER_LIBS: "-L/Library/Frameworks/GStreamer.framework/Libraries/ -lgstvideo-1.0 -lgstaudio-1.0 -lgstbase-1.0 -lgsttag-1.0 -lgstreamer-1.0 -Wl,-rpath,/Library/Frameworks/GStreamer.framework/Libraries -lgobject-2.0 -lglib-2.0 -lintl"
           LDFLAGS: "-Wl,-headerpad_max_install_names -Wl,-rpath,/usr/X11/lib"
           PKG_CONFIG_DIR:
           PKG_CONFIG_LIBDIR: "/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig"
@@ -55,7 +55,6 @@ jobs:
           ./configure \
             --build=x86_64-apple-darwin \
             --enable-archs=i386,x86_64 \
-            --enable-win64 \
             --without-alsa \
             --without-capi \
             --without-dbus \
