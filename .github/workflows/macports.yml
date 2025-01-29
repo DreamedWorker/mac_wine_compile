@@ -15,12 +15,12 @@ jobs:
     runs-on:  macos-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       
-      - name: Install macports
+      - name: Install MacPorts
         run: . $GITHUB_WORKSPACE/.github/workflows/bootstrap_macports.sh
         
-      - name: Add Macports to PATH
+      - name: Add MacPorts to PATH
         run: |
           set -eu
           echo "/opt/local/bin" >> $GITHUB_PATH
@@ -29,35 +29,41 @@ jobs:
       - name: Install dependencies
         run: |
            sudo port selfupdate
-           sudo port install     bison \
-                                 faudio \
-                                 freetype \
-                                 gstreamer1-gst-plugins-base \
-                                 gnutls \
-                                 mingw-w64
+           sudo port install \
+             bison \
+             freetype \
+             gnutls \
+             mingw-w64
 
       - name: Fetch wine source
         run: git clone --depth=1 https://github.com/wine-mirror/wine.git
 
-      - name: Configure wine64
+      - name: Configure wine
         env:
-          # Make dlopen() function like wine_dlopen()
-          LDFLAGS: "-Wl,-headerpad_max_install_names,-rpath,@loader_path/../,-rpath,/opt/local/lib,-rpath,/opt/X11/lib"
-          # Avoid weird linker errors with Xcode 10 and later
+          CC: "ccache clang -arch x86_64"
+          CXX: "ccache clang++ -arch x86_64"
+          i386_CC: "ccache i686-w64-mingw32-gcc"
+          x86_64_CC: "ccache x86_64-w64-mingw32-gcc"
+          GSTREAMER_CFLAGS: "-I/Library/Frameworks/GStreamer.framework/Headers"
+          GSTREAMER_LIBS: "-L/Library/Frameworks/GStreamer.framework/Libraries/ -lgstvideo-1.0 -lgstaudio-1.0 -lgstbase-1.0 -lgsttag-1.0 -lgstreamer-1.0 -Wl,-rpath,/Library/Frameworks/GStreamer.framework/Libraries -lgobject-2.0 -lglib-2.0 -lintl"
+          LDFLAGS: "-Wl,-headerpad_max_install_names -Wl,-rpath,/opt/local/lib"
           MACOSX_DEPLOYMENT_TARGET: "10.14"
         run: |
           cd $GITHUB_WORKSPACE/wine
-          ./configure   --enable-win64 \
-                        --without-alsa \
-                        --without-capi \
-                        --without-dbus \
-                        --without-inotify \
-                        --without-oss \
-                        --without-pulse \
-                        --without-udev \
-                        --without-v4l2
+          ./configure \
+            --build=x86_64-apple-darwin \
+            --enable-archs=i386,x86_64 \
+            --without-alsa \
+            --without-capi \
+            --without-dbus \
+            --without-oss \
+            --without-pulse \
+            --without-udev \
+            --without-v4l2 \
+            --without-wayland \
+            --without-x
 
-      - name: Build wine64
+      - name: Build wine
         run: |
           cd $GITHUB_WORKSPACE/wine
           make -j$(sysctl -n hw.ncpu 2>/dev/null)
@@ -66,9 +72,9 @@ jobs:
     runs-on:  macos-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Install macports
+      - name: Install MacPorts
         run: . $GITHUB_WORKSPACE/.github/workflows/bootstrap_macports.sh
 
       - name: Determine list of changed ports
