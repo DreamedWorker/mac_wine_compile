@@ -138,15 +138,16 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/wine
           ./configure \
-            --enable-win64 \
+            --build=x86_64-apple-darwin \
+            --enable-archs=i386,x86_64 \
             --without-alsa \
             --without-capi \
             --without-dbus \
-            --without-inotify \
             --without-oss \
             --without-pulse \
             --without-udev \
             --without-v4l2 \
+            --without-wayland \
             --without-x
 
       - name: Build wine
