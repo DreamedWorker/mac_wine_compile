@@ -50,7 +50,6 @@ jobs:
           sudo port install \
             bison \
             ccache \
-            gettext \
             mingw-w64 \
             pkgconfig
 
@@ -58,7 +57,6 @@ jobs:
         run: |
           sudo port install \
             freetype \
-            gettext-runtime \
             gnutls-devel \
             libinotify \
             moltenvk \
@@ -103,16 +101,23 @@ jobs:
           echo "/opt/local/bin" >> $GITHUB_PATH
           echo "/opt/local/sbin" >> $GITHUB_PATH
 
-      - name: Install dependencies
+      - name: Install build dependencies
         run: |
-           sudo port selfupdate
-           sudo port install     autoconf \
-                                 bison \
-                                 faudio \
-                                 freetype \
-                                 gstreamer1-gst-plugins-base \
-                                 gnutls \
-                                 mingw-w64
+          sudo port install \
+            autoconf \
+            bison \
+            ccache \
+            mingw-w64 \
+            pkgconfig
+
+      - name: Install runtime dependencies
+        run: |
+          sudo port install \
+            freetype \
+            gnutls-devel \
+            libinotify \
+            moltenvk \
+            libsdl2
 
       - name: Fetch wine-staging source
         run: git clone --depth=1 https://github.com/wine-staging/wine-staging
@@ -129,25 +134,22 @@ jobs:
         run: |
           $GITHUB_WORKSPACE/wine-staging/patches/patchinstall.sh DESTDIR=$GITHUB_WORKSPACE/wine
 
-      - name: Configure wine64
-        env:
-          # Make dlopen() function like wine_dlopen()
-          LDFLAGS: "-Wl,-headerpad_max_install_names,-rpath,@loader_path/../,-rpath,/opt/local/lib,-rpath,/opt/X11/lib"
-          # Avoid weird linker errors with Xcode 10 and later
-          MACOSX_DEPLOYMENT_TARGET: "10.14"
+      - name: Configure wine
         run: |
           cd $GITHUB_WORKSPACE/wine
-          ./configure   --enable-win64 \
-                        --without-alsa \
-                        --without-capi \
-                        --without-dbus \
-                        --without-inotify \
-                        --without-oss \
-                        --without-pulse \
-                        --without-udev \
-                        --without-v4l2
+          ./configure \
+            --enable-win64 \
+            --without-alsa \
+            --without-capi \
+            --without-dbus \
+            --without-inotify \
+            --without-oss \
+            --without-pulse \
+            --without-udev \
+            --without-v4l2 \
+            --without-x
 
-      - name: Build wine64
+      - name: Build wine
         run: |
           cd $GITHUB_WORKSPACE/wine
           make -j$(sysctl -n hw.ncpu 2>/dev/null)
