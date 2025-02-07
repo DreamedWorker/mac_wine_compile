@@ -32,9 +32,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install GStreamer.framework & XQuartz
+      - name: Install GStreamer.framework
         run: |
-          brew install --cask gstreamer-development xquartz
+          brew install --cask gstreamer-development
 
       - name: Install MacPorts
         run: . $GITHUB_WORKSPACE/.github/workflows/bootstrap_macports.sh
