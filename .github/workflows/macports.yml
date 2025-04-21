@@ -139,7 +139,8 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/wine
           ./configure \
-            --prefix=$GITHUB_WORKSPACE/dest \
+            --prefix= \
+            --disable-tests \
             --build=x86_64-apple-darwin \
             --enable-archs=i386,x86_64 \
             --without-alsa \
@@ -156,4 +157,14 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/wine
           make -j$(sysctl -n hw.ncpu 2>/dev/null)
-          make install
+          make install-lib DESTDIR="$GITHUB_WORKSPACE/wine"
+
+      - name: Tar wine
+        run: |
+          tar -czvf wine.tar.gz $GITHUB_WORKSPACE/wine
+
+      - name: Uploading wine
+        uses: actions/upload-artifact@v4
+        with:
+          name: wine-build-rel
+          path: wine.tar.gz
