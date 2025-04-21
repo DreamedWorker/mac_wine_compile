@@ -133,11 +133,13 @@ jobs:
       - name: Apply Staging patches
         run: |
           $GITHUB_WORKSPACE/wine-staging/patches/patchinstall.sh DESTDIR=$GITHUB_WORKSPACE/wine
+          mkdir $GITHUB_WORKSPACE/dest
 
       - name: Configure wine
         run: |
           cd $GITHUB_WORKSPACE/wine
           ./configure \
+            --prefix=$GITHUB_WORKSPACE/dest \
             --build=x86_64-apple-darwin \
             --enable-archs=i386,x86_64 \
             --without-alsa \
@@ -154,3 +156,4 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/wine
           make -j$(sysctl -n hw.ncpu 2>/dev/null)
+          make install
