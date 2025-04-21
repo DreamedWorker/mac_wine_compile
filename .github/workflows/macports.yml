@@ -85,6 +85,17 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/wine
           make -j$(sysctl -n hw.ncpu 2>/dev/null)
+          make install-lib DESTDIR="$GITHUB_WORKSPACE/wine"
+
+      - name: Tar wine
+        run: |
+          tar -czvf wine.tar.gz $GITHUB_WORKSPACE/wine
+
+      - name: Uploading wine
+        uses: actions/upload-artifact@v4
+        with:
+          name: wine-build-rel
+          path: wine.tar.gz
 
   wine-staging:
     runs-on:  macos-latest
